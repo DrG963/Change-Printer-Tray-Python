@@ -5,6 +5,7 @@ from flask import Flask, request, jsonify
 import os
 from flask_cors import CORS, cross_origin
 import subprocess
+import json
 
 app = Flask(__name__)
 
@@ -16,6 +17,9 @@ device_name = "Brother MFC-J6955DW Printer"
 ps1_path = './initscan.ps1'
 
 network_path = '\\\\tpcserver\\jobFiles\\'
+
+method = "c"
+# can be c for c# or p for powershell
 
 @app.route('/changeprintertray')
 @cross_origin()
@@ -55,6 +59,14 @@ def scan_and_save():
     customerID = data.get("customerID")
     contactID = data.get("contactID")
 
+    network_path = '\\\\tpcserver\\jobFiles\\'
+    # Generate the file path based on the provided IDs
+    file_directory = f"{network_path}\\C.{customerID}\\P.{contactID}\\J.{tpcID}\\"
+    os.makedirs(file_directory, exist_ok=True)
+    file_name = f"{filename}.jpg"
+    full_file_path = file_directory + file_name
+    network_web_path = f"//tpcserver/TPC/jobFiles/C.{customerID}/P.{contactID}/J.{tpcID}/{file_name}"
+
     print(data)
 
     # Check if required data is missing
@@ -62,55 +74,70 @@ def scan_and_save():
         print("Missing Data!")
         return jsonify({'error': 'Missing data'}), 400
     
-    try:
-        network_path = '\\\\tpcserver\\jobFiles\\'
-        # Generate the file path based on the provided IDs
-        file_directory = f"{network_path}\\C.{customerID}\\P.{contactID}\\J.{tpcID}\\"
-        os.makedirs(file_directory, exist_ok=True)
+    if method == "p":
+        try:
+            # open PS1 file, change file path text
+            with open(ps1_path, "r+") as file:
+                content = file.read()
+                content = content.replace("superpythonpointer", full_file_path)
+                file.seek(0)
+                file.write(content)
+                file.truncate()
 
-        # Save the scanned image to a file with the provided filename and extension
-        file_name = f"{filename}.jpg"
-        full_file_path = file_directory + file_name
+            # run PS1 file
+            # Run the PowerShell script
+            result = subprocess.run(['powershell', '-File', ps1_path], capture_output=True, text=True)
 
-        network_web_path = f"//tpcserver/TPC/jobFiles/C.{customerID}/P.{contactID}/J.{tpcID}/{file_name}"
+            # open PS1 file, change file path text back for next cycle
+            with open(ps1_path, "r+") as file:
+                content = file.read()
+                content = content.replace(full_file_path, "superpythonpointer")
+                file.seek(0)
+                file.write(content)
+                file.truncate()
 
-        # open PS1 file, change file path text
-        with open(ps1_path, "r+") as file:
-            content = file.read()
-            content = content.replace("superpythonpointer", full_file_path)
-            file.seek(0)
-            file.write(content)
-            file.truncate()
+            # Check if the script ran successfully
+            if result.returncode == 0:
+                print("PowerShell script ran successfully.")
+                print("Script output:")
+                print(result.stdout)
+            else:
+                print("PowerShell script encountered an error.")
+                print("Error output:")
+                print(result.stderr)
+                return jsonify({'error': 'PS1 File execution FAILED'}), 400
 
-        # run PS1 file
-        # Run the PowerShell script
-        result = subprocess.run(['powershell', '-File', ps1_path], capture_output=True, text=True)
+            print("FILE SAVED AND WHATNOT")
 
-        # open PS1 file, change file path text back for next cycle
-        with open(ps1_path, "r+") as file:
-            content = file.read()
-            content = content.replace(full_file_path, "superpythonpointer")
-            file.seek(0)
-            file.write(content)
-            file.truncate()
+            return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
 
-        # Check if the script ran successfully
-        if result.returncode == 0:
-            print("PowerShell script ran successfully.")
-            print("Script output:")
-            print(result.stdout)
-        else:
-            print("PowerShell script encountered an error.")
-            print("Error output:")
-            print(result.stderr)
-            return jsonify({'error': 'PS1 File execution FAILED'}), 400
+        except Exception as error:
+            return jsonify({'error': 'there was a problem in scan_and_save'}), 400
+        
+    if method == "c":
+        config = {}
+        try:
+            # Modify the save directory
+            config['saveDirectory'] = file_directory
+            config['filename'] = file_name
+            # Save the updated configuration
+            with open('./savepath.json', 'w') as config_file:
+                json.dump(config, config_file)
 
-        print("FILE SAVED AND WHATNOT")
+            # process = subprocess.Popen(['./', full_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            # stdout, stderr = process.communicate()
+            # print("Standard Output:")
+            # print(stdout.decode('utf-8'))
+            # if stderr:
+            #     print("Standard Error:")
+            #     print(stderr.decode('utf-8'))
 
-        return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
-
-    except Exception as error:
-        return jsonify({'error': 'there was a problem in scan_and_save'}), 400
+            # # Wait for the process to finish.
+            # process.wait()
+            return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
+        except Exception as error:
+            print(error)
+            return jsonify({'error': 'there was a problem in scan_and_save c version'}), 400
 
 if __name__ == "__main__":
     # Check if the network path exists
