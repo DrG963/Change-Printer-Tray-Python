@@ -127,10 +127,14 @@ def scan_and_save():
             process = subprocess.Popen(['scannerapp\\bin\\Debug\\net8.0\\scannerapp.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             print("Standard Output:")
-            print(stdout.decode('utf-8'))
+            csharp_output = stdout.decode('utf-8')
+            print(csharp_output)
+            if "ERROR" in csharp_output.upper():
+                return jsonify({'error': 'there was a problem in scan_and_save c version - error was in output text'}), 400
             if stderr:
                 print("Standard Error:")
                 print(stderr.decode('utf-8'))
+                return jsonify({'error': 'there was a problem in scan_and_save c version - stderr output type detected'}), 400
 
             # Wait for the process to finish.
             process.wait()
