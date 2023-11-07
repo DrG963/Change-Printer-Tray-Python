@@ -2,10 +2,14 @@ import win32print
 # import win32gui
 from flask import Flask, request, jsonify
 import pyscanner as scanner
+import os
 
 app = Flask(__name__)
 
+# define printer name exactly as listed here...
 device_name = "Brother MFC-J6955DW Printer"
+
+network_path = '\\\\tpcserver\\jobFiles\\'
 
 @app.route('/changeprintertray')
 def change_printer_tray():
@@ -37,12 +41,12 @@ def scan_and_save():
     # Get data from the JSON request
     data = request.get_json()
     filename = data.get('filename')
-    filetype = data.get('filetype')
-    customername = data.get('customername')
-    tpcID = data.get('tpcID')
+    tpcID = data.get('jobID')
+    customerID = data.get("customerID")
+    contactID = data.get("contactID")
 
     # Check if required data is missing
-    if not filename or not filetype or not customername or not tpcID:
+    if not filename or not customerID or not contactID or not tpcID:
         return jsonify({'error': 'Missing data'}), 400
 
     # List available scanners
@@ -59,14 +63,28 @@ def scan_and_save():
         # Queue a scan
         scanned_image = selected_scanner.scan(scan_settings)
 
+        network_path = '\\\\tpcserver\\jobFiles\\'
+        # Generate the file path based on the provided IDs
+        file_directory = f"{network_path}\\C.{customerID}\\P.{contactID}\\J.{tpcID}\\"
+        os.makedirs(file_directory, exist_ok=True)
+
         # Save the scanned image to a file with the provided filename and extension
-        file_path = f"{filename}.{filetype}"
-        with open(file_path, "wb") as f:
+        file_name = f"{filename}.jpg"
+        full_file_path = file_directory + file_name
+        with open(full_file_path, "wb") as f:
             f.write(scanned_image)
 
-        return jsonify({'message': 'Scanned document saved successfully', 'file_path': file_path})
+        return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path})
     else:
         return jsonify({'error': 'No scanners found'})
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    # Check if the network path exists
+    if os.path.exists(network_path):
+        # Access the network location
+        try:
+            app.run(debug=True, port=3030)
+        except Exception as e:
+            print(f"Error accessing network location: {e}")
+    else:
+        raise Exception(f"Network path '{network_path}' does not exist.")
