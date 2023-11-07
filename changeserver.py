@@ -74,9 +74,11 @@ def scan_and_save():
         with open(full_file_path, "wb") as f:
             f.write(scanned_image)
 
-        return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path})
+        network_web_path = f"//tpcserver/TPC/jobFiles/C.{customerID}/P.{contactID}/J.{tpcID}/{file_name}"
+
+        return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
     else:
-        return jsonify({'error': 'No scanners found'})
+        return jsonify({'error': 'No scanners found'}), 400
 
 if __name__ == "__main__":
     # Check if the network path exists
