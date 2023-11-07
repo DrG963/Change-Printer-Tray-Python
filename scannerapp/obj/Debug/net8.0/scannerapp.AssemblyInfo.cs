@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("scannerapp")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0a945470eefccac510d8f20de44b39e789bd285b")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+be5f9f98639ebd90c8c4e3003fb55efe520b735f")]
 [assembly: System.Reflection.AssemblyProductAttribute("scannerapp")]
 [assembly: System.Reflection.AssemblyTitleAttribute("scannerapp")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
