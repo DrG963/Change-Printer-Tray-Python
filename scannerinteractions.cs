@@ -11,7 +11,7 @@ class Program
         string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
         // Construct the path to the configuration file
-        string configPath = Path.Combine(exeDirectory, "savepath.json");
+        string configPath = Path.Combine(exeDirectory, "../../../../../savepath.json");
 
         // Check if the configuration file exists
         if (File.Exists(configPath))

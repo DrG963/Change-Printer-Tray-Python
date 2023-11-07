@@ -124,7 +124,7 @@ def scan_and_save():
             with open('./savepath.json', 'w') as config_file:
                 json.dump(config, config_file)
 
-            process = subprocess.Popen(['./scannerapp.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            process = subprocess.Popen(['scannerapp\\bin\\Debug\\net8.0\\scannerapp.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = process.communicate()
             print("Standard Output:")
             print(stdout.decode('utf-8'))
