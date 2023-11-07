@@ -1,7 +1,7 @@
 import win32print
 # import win32gui
 from flask import Flask, request, jsonify
-import scanner
+import pyscanner as scanner
 
 app = Flask(__name__)
 
