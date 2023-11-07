@@ -124,16 +124,16 @@ def scan_and_save():
             with open('./savepath.json', 'w') as config_file:
                 json.dump(config, config_file)
 
-            # process = subprocess.Popen(['./', full_file_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            # stdout, stderr = process.communicate()
-            # print("Standard Output:")
-            # print(stdout.decode('utf-8'))
-            # if stderr:
-            #     print("Standard Error:")
-            #     print(stderr.decode('utf-8'))
+            process = subprocess.Popen(['./scannerapp.exe'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = process.communicate()
+            print("Standard Output:")
+            print(stdout.decode('utf-8'))
+            if stderr:
+                print("Standard Error:")
+                print(stderr.decode('utf-8'))
 
-            # # Wait for the process to finish.
-            # process.wait()
+            # Wait for the process to finish.
+            process.wait()
             return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
         except Exception as error:
             print(error)

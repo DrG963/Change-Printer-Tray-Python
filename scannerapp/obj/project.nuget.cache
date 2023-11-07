@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "dgSpecHash": "iNMfCRaVcBOOgr561X1l61sOOW3AT1XEg5zRHrlCnv9rpKRwRH6gqJCPiYboqHfnPoO0MCXXUbvHQyIhvNaOSw==",
+  "success": true,
+  "projectFilePath": "C:\\Users\\grbsk\\OneDrive\\Documents\\CODE\\Temperature Processing\\Change-Printer-Tray-Python\\scannerapp\\scannerapp.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\grbsk\\.nuget\\packages\\microsoft.win32.systemevents\\7.0.0\\microsoft.win32.systemevents.7.0.0.nupkg.sha512",
+    "C:\\Users\\grbsk\\.nuget\\packages\\newtonsoft.json\\13.0.3\\newtonsoft.json.13.0.3.nupkg.sha512",
+    "C:\\Users\\grbsk\\.nuget\\packages\\system.drawing.common\\7.0.0\\system.drawing.common.7.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
