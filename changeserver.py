@@ -1,21 +1,29 @@
 import win32print
 # import win32gui
 from flask import Flask, request, jsonify
-import pyscanner as scanner
+# import pyscanner as scanner
 import os
+from flask_cors import CORS, cross_origin
+import subprocess
 
 app = Flask(__name__)
+
+cors = CORS(app, resources={r"*": {"origins": "http://192.168.1.98:5000"}})
 
 # define printer name exactly as listed here...
 device_name = "Brother MFC-J6955DW Printer"
 
+ps1_path = './initscan.ps1'
+
 network_path = '\\\\tpcserver\\jobFiles\\'
 
 @app.route('/changeprintertray')
+@cross_origin()
 def change_printer_tray():
     tray_number = request.args.get('tray', type=int)
 
     if tray_number is None and tray_number != 1 and tray_number != 2:
+        print("Invalid Tray Number")
         return "Invalid tray number", 400
 
     # Get a handle for the default printer
@@ -34,9 +42,11 @@ def change_printer_tray():
     win32print.SetPrinter(handle, 2, properties, 0)
 
     # Confirm the changes were updated
+    print(f"Changed printer tray to {tray_number}")
     return f"Changed printer tray to {tray_number}"
 
 @app.route('/scan_and_save', methods=['POST'])
+@cross_origin()
 def scan_and_save():
     # Get data from the JSON request
     data = request.get_json()
@@ -45,24 +55,14 @@ def scan_and_save():
     customerID = data.get("customerID")
     contactID = data.get("contactID")
 
+    print(data)
+
     # Check if required data is missing
     if not filename or not customerID or not contactID or not tpcID:
+        print("Missing Data!")
         return jsonify({'error': 'Missing data'}), 400
-
-    # List available scanners
-    available_scanners = scanner.Scanner().get_scanners()
-
-    if available_scanners:
-        selected_scanner = available_scanners[0]  # Choose the first available scanner
-
-        # Configure scanning parameters (e.g., resolution, color mode, etc.)
-        scan_settings = scanner.ScannerSettings()
-        scan_settings.color_mode = scanner.ColorMode.COLOR
-        scan_settings.resolution = 300  # DPI
-
-        # Queue a scan
-        scanned_image = selected_scanner.scan(scan_settings)
-
+    
+    try:
         network_path = '\\\\tpcserver\\jobFiles\\'
         # Generate the file path based on the provided IDs
         file_directory = f"{network_path}\\C.{customerID}\\P.{contactID}\\J.{tpcID}\\"
@@ -71,14 +71,46 @@ def scan_and_save():
         # Save the scanned image to a file with the provided filename and extension
         file_name = f"{filename}.jpg"
         full_file_path = file_directory + file_name
-        with open(full_file_path, "wb") as f:
-            f.write(scanned_image)
 
         network_web_path = f"//tpcserver/TPC/jobFiles/C.{customerID}/P.{contactID}/J.{tpcID}/{file_name}"
 
+        # open PS1 file, change file path text
+        with open(ps1_path, "r+") as file:
+            content = file.read()
+            content = content.replace("superpythonpointer", full_file_path)
+            file.seek(0)
+            file.write(content)
+            file.truncate()
+
+        # run PS1 file
+        # Run the PowerShell script
+        result = subprocess.run(['powershell', '-File', ps1_path], capture_output=True, text=True)
+
+        # open PS1 file, change file path text back for next cycle
+        with open(ps1_path, "r+") as file:
+            content = file.read()
+            content = content.replace(full_file_path, "superpythonpointer")
+            file.seek(0)
+            file.write(content)
+            file.truncate()
+
+        # Check if the script ran successfully
+        if result.returncode == 0:
+            print("PowerShell script ran successfully.")
+            print("Script output:")
+            print(result.stdout)
+        else:
+            print("PowerShell script encountered an error.")
+            print("Error output:")
+            print(result.stderr)
+            return jsonify({'error': 'PS1 File execution FAILED'}), 400
+
+        print("FILE SAVED AND WHATNOT")
+
         return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
-    else:
-        return jsonify({'error': 'No scanners found'}), 400
+
+    except Exception as error:
+        return jsonify({'error': 'there was a problem in scan_and_save'}), 400
 
 if __name__ == "__main__":
     # Check if the network path exists
