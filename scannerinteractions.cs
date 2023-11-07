@@ -10,6 +10,8 @@ class Program
         // Get the current directory where the executable is located
         string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
 
+        Console.WriteLine($"EXE DIR {exeDirectory}");
+
         // Construct the path to the configuration file
         string configPath = Path.Combine(exeDirectory, "savepath.json");
 

@@ -11,7 +11,8 @@ class Program
     {
         // Your existing code for reading configuration...
         string exeDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        string configPath = Path.Combine(exeDirectory, "config.json");
+        Console.WriteLine($"Save Directory: {exeDirectory}");
+        string configPath = Path.Combine(exeDirectory, "savepath.json");
 
         if (File.Exists(configPath))
         {
