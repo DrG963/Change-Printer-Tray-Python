@@ -6,7 +6,8 @@ import os
 from flask_cors import CORS, cross_origin
 import subprocess
 import json
-import pyuac
+# import pyuac
+from PIL import Image
 
 app = Flask(__name__)
 
@@ -21,6 +22,38 @@ network_path = '\\\\tpcserver\\jobFiles\\'
 
 method = "c"
 # can be c for c# or p for powershell
+
+
+def resize_scan(img_path):
+    # Path to the original image
+    original_image_path = img_path
+
+    # Open the original image
+    image = Image.open(original_image_path)
+
+    # Define the desired width and height for letter size paper
+    desired_width = 8.5 * 300  # 8.5 inches at 300 DPI
+    desired_height = 11 * 300  # 11 inches at 300 DPI
+
+    # Resize the image while maintaining aspect ratio
+    image.thumbnail((desired_width, desired_height))
+
+    # Get the directory and filename of the original image
+    image_directory, image_filename = os.path.split(original_image_path)
+
+    # Generate the path for the resized image with the same name
+    resized_image_path = os.path.join(image_directory, "resized_" + image_filename)
+
+    # Save the resized image with the same name as the original
+    image.save(resized_image_path)
+
+    # Delete the original image
+    os.remove(original_image_path)
+
+    # Rename the resized image to have the same name as the original
+    os.rename(resized_image_path, original_image_path)
+
+    print(f"Resized and renamed: {original_image_path}")
 
 @app.route('/changeprintertray')
 @cross_origin()
@@ -136,9 +169,11 @@ def scan_and_save():
                 print("Standard Error:")
                 print(stderr.decode('utf-8'))
                 return jsonify({'error': 'there was a problem in scan_and_save c version - stderr output type detected'}), 400
-
+            
             # Wait for the process to finish.
             process.wait()
+
+            resize_scan(full_file_path)
             return jsonify({'message': 'Scanned document saved successfully', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
         except Exception as error:
             print(error)
