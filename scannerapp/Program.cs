@@ -48,8 +48,8 @@ class Program
                     item.Properties["6146"].set_Value(1); // Color
                     item.Properties["6147"].set_Value(300); // DPI
                     item.Properties["6149"].set_Value(1); // Set to maintain aspect ratio
-                    // item.Properties["6151"].set_Value(8.5); // Width of the scanning area in inches
-                    // item.Properties["6152"].set_Value(11);   // Height of the scanning area in inches
+                    item.Properties["6151"].set_Value(8.5); // Width of the scanning area in inches
+                    item.Properties["6152"].set_Value(11);   // Height of the scanning area in inches
 
                     // Transfer the image in its native format (BMP)
                     ImageFile image = (ImageFile)item.Transfer(FormatID.wiaFormatBMP);
