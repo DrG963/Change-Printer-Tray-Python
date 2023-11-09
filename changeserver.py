@@ -6,10 +6,11 @@ import os
 from flask_cors import CORS, cross_origin
 import subprocess
 import json
+import pyuac
 
 app = Flask(__name__)
 
-cors = CORS(app, resources={r"*": {"origins": "http://192.168.1.98:5000"}})
+cors = CORS(app, resources={r"*": {"origins": "*"}})
 
 # define printer name exactly as listed here...
 device_name = "Brother MFC-J6955DW Printer"
@@ -146,10 +147,6 @@ def scan_and_save():
 if __name__ == "__main__":
     # Check if the network path exists
     if os.path.exists(network_path):
-        # Access the network location
-        try:
-            app.run(debug=True, port=3030)
-        except Exception as e:
-            print(f"Error accessing network location: {e}")
+        app.run(debug=True, port=3030)
     else:
         raise Exception(f"Network path '{network_path}' does not exist.")
