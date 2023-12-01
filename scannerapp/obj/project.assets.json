@@ -176,11 +176,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\grbsk\\OneDrive\\Documents\\CODE\\Temperature Processing\\Change-Printer-Tray-Python\\scannerapp\\scannerapp.csproj",
+      "projectUniqueName": "C:\\Users\\grbsk\\OneDrive\\Desktop\\Change-Printer-Tray-Python-main\\Change-Printer-Tray-Python-main\\scannerapp\\scannerapp.csproj",
       "projectName": "scannerapp",
-      "projectPath": "C:\\Users\\grbsk\\OneDrive\\Documents\\CODE\\Temperature Processing\\Change-Printer-Tray-Python\\scannerapp\\scannerapp.csproj",
+      "projectPath": "C:\\Users\\grbsk\\OneDrive\\Desktop\\Change-Printer-Tray-Python-main\\Change-Printer-Tray-Python-main\\scannerapp\\scannerapp.csproj",
       "packagesPath": "C:\\Users\\grbsk\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\grbsk\\OneDrive\\Documents\\CODE\\Temperature Processing\\Change-Printer-Tray-Python\\scannerapp\\obj\\",
+      "outputPath": "C:\\Users\\grbsk\\OneDrive\\Desktop\\Change-Printer-Tray-Python-main\\Change-Printer-Tray-Python-main\\scannerapp\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\grbsk\\AppData\\Roaming\\NuGet\\NuGet.Config"

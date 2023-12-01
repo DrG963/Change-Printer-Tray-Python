@@ -8,6 +8,9 @@ import subprocess
 import json
 # import pyuac
 from PIL import Image
+from waitress import serve
+import win32com.client
+
 
 app = Flask(__name__)
 
@@ -20,9 +23,45 @@ ps1_path = './initscan.ps1'
 
 network_path = '\\\\tpcserver\\jobFiles\\'
 
-method = "c"
-# can be c for c# or p for powershell
+method = "python"
+# can be c for c# or p for powershell, or python for the python win32 dialogue method
+# c is current working version, p is trash
 
+# can set a match name, if you want
+def acquire_image_wia(save_path, scanner_name=None):
+    WIA_IMG_FORMAT_PNG = "{B96B3CAF-0728-11D3-9D7B-0000F81EF32E}"
+
+    # wia = win32com.client.Dispatch("WIA.CommonDialog")
+    device_manager = win32com.client.Dispatch("WIA.DeviceManager")
+
+    # Select the first available scanner or a specific one by name
+    scanner_device = None
+    for device in device_manager.DeviceInfos:
+        if device.Type == 1:  # Type 1 corresponds to scanner
+            if device.Properties["Name"].Value in scanner_name:
+                scanner_device = device.Connect()
+                break
+            if scanner_name is None:
+                pass
+            else:
+                scanner_device = device.Connect()
+                break
+        
+    if not scanner_device:
+        print("No WIA scanner device found.")
+        return
+
+    # Assuming the scanner is the first item (which it typically is)
+    item = scanner_device.Items[1]
+
+    image = item.Transfer(WIA_IMG_FORMAT_PNG)
+    fname = save_path
+    
+    if os.path.exists(fname):
+        os.remove(fname)
+    
+    image.SaveFile(fname)
+    print(f"Image saved to {fname}")
 
 def resize_scan(img_path):
     # Path to the original image
@@ -32,11 +71,14 @@ def resize_scan(img_path):
     image = Image.open(original_image_path)
 
     # Define the desired width and height for letter size paper
-    desired_width = 8.5 * 300  # 8.5 inches at 300 DPI
-    desired_height = 11 * 300  # 11 inches at 300 DPI
+    desired_width = int(8.5 * 300)  # 8.5 inches at 300 DPI
+    desired_height = int(11 * 300)  # 11 inches at 300 DPI
 
-    # Resize the image while maintaining aspect ratio
-    image.thumbnail((desired_width, desired_height))
+    # Resize the image to the desired width and height without maintaining aspect ratio
+    image = image.resize((desired_width, desired_height))
+    image = image.crop((0, 0, 1861.5, 2112))
+    image = image.resize((desired_width, desired_height))
+    # 26.5% RIGHT MARGIN
 
     # Get the directory and filename of the original image
     image_directory, image_filename = os.path.split(original_image_path)
@@ -78,6 +120,8 @@ def change_printer_tray():
     # Write these changes back to the printer
     properties["pDevMode"] = devmode
     win32print.SetPrinter(handle, 2, properties, 0)
+
+    win32print.ClosePrinter(handle)
 
     # Confirm the changes were updated
     print(f"Changed printer tray to {tray_number}")
@@ -178,10 +222,19 @@ def scan_and_save():
         except Exception as error:
             print(error)
             return jsonify({'error': 'there was a problem in scan_and_save c version'}), 400
+        
+    if method == "python":
+        try:
+            acquire_image_wia(full_file_path)
+            return jsonify({'message': 'Scanned document saved successfully via python', 'file_path': full_file_path, "filename": file_name, "web_path": network_web_path}), 200
+        except Exception as e:
+            print(e)
+            return jsonify({'error': 'there was a problem in scan_and_save python version. Needs manual check'}), 400
 
 if __name__ == "__main__":
     # Check if the network path exists
     if os.path.exists(network_path):
-        app.run(debug=True, port=3030)
+        # app.run(debug=True, port=3030)
+        serve(app, port=3030)
     else:
         raise Exception(f"Network path '{network_path}' does not exist.")

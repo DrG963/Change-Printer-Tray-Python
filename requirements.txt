@@ -3,3 +3,4 @@ pywin32
 docopt
 requests
 flask-cors
+waitress

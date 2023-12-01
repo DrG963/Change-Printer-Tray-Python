@@ -8,6 +8,6 @@ build_property.PlatformNeutralAssembly =
 build_property.EnforceExtendedAnalyzerRules = 
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = scannerapp
-build_property.ProjectDir = C:\Users\grbsk\OneDrive\Documents\CODE\Temperature Processing\Change-Printer-Tray-Python\scannerapp\
+build_property.ProjectDir = C:\Users\grbsk\OneDrive\Desktop\Change-Printer-Tray-Python-main\Change-Printer-Tray-Python-main\scannerapp\
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
