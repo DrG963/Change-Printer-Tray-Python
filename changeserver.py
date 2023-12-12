@@ -229,6 +229,6 @@ if __name__ == "__main__":
     # Check if the network path exists
     if os.path.exists(network_path):
         # app.run(debug=True, port=3030)
-        serve(app, port=3030)
+        serve(app, port=3030, threads=4)
     else:
         raise Exception(f"Network path '{network_path}' does not exist.")
