@@ -1,0 +1,7 @@
+# Run PowerShell as an administrator to execute this script
+
+# Create an inbound rule
+New-NetFirewallRule -DisplayName "TPC App Inbound Port 5000" -Direction Inbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
+
+# Create an outbound rule
+New-NetFirewallRule -DisplayName "TPC App Outbound Port 5000" -Direction Outbound -Protocol TCP -LocalPort 5000 -Action Allow -Profile Any
